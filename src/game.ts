@@ -1,4 +1,4 @@
-import { hasScoringOption, OPENING_SCORE, scoreSelection, WINNING_SCORE } from "./rules";
+import { hasScoringOption, OPENING_SCORE, scoreSelection, scoringHints, WINNING_SCORE } from "./rules";
 
 export type Phase = "setup" | "rollOff" | "needRoll" | "select" | "farkle" | "gameOver";
 
@@ -174,6 +174,22 @@ export function toggleDie(state: GameState, id: number): GameState {
     ...state,
     dice: state.dice.map((die) => (die.id === id ? { ...die, selected: !die.selected } : die)),
   };
+}
+
+/** Keep every die that can score on this roll. Non-scoring dice are left unselected. */
+export function selectScoringDice(state: GameState): GameState {
+  if (state.phase !== "select") return state;
+  const hints = scoringHints(state.dice.map((die) => die.value));
+  return {
+    ...state,
+    dice: state.dice.map((die, index) => ({ ...die, selected: hints[index] })),
+  };
+}
+
+export function canSelectScoringDice(state: GameState): boolean {
+  if (state.phase !== "select") return false;
+  const hints = scoringHints(state.dice.map((die) => die.value));
+  return hints.some((hint, index) => hint && !state.dice[index].selected);
 }
 
 export function selectionView(state: GameState): SelectionView {

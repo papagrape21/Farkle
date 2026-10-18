@@ -5,9 +5,11 @@ import {
   beginPlay,
   canBank,
   canRollRemaining,
+  canSelectScoringDice,
   commitAndRoll,
   createGame,
   rollForFirst,
+  selectScoringDice,
   selectionView,
   startRollOff,
   toggleDie,
@@ -310,6 +312,7 @@ function actions(): string {
       ? `<p class="reason" data-testid="bank-reason">${escapeHtml(gate.reason)}</p>`
       : "";
   return `<div class="actions">
+      <button type="button" class="secondary" data-testid="select-scoring" data-action="select-scoring" ${canSelectScoringDice(state) ? "" : "disabled"}>Select all scoring dice</button>
       <button type="button" class="primary" data-testid="roll-button" data-action="roll" ${canRollRemaining(state) ? "" : "disabled"}>${rollLabel}</button>
       <button type="button" class="secondary" data-testid="bank-button" data-action="bank" ${gate.ok ? "" : "disabled"}>${bankLabel}</button>
     </div>${reason}`;
@@ -572,6 +575,13 @@ function onClick(event: MouseEvent): void {
   }
   if (action === "bank") {
     onBank();
+    return;
+  }
+  if (action === "select-scoring") {
+    if (ui.rolling || !canSelectScoringDice(state)) return;
+    state = selectScoringDice(state);
+    ui.error = "";
+    render();
     return;
   }
   if (action === "farkle-next") {

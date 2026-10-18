@@ -5,8 +5,10 @@ import {
   bank,
   beginPlay,
   canBank,
+  canSelectScoringDice,
   commitAndRoll,
   rollForFirst,
+  selectScoringDice,
   selectionView,
   startRollOff,
   toggleDie,
@@ -78,6 +80,17 @@ describe("opening the game", () => {
 });
 
 describe("a turn", () => {
+  it("selects every scoring die and clears non-scoring picks", () => {
+    let state = beginWith(["Ada", "Bo"], 0);
+    state = applyRoll(state, [1, 1, 1, 2, 3, 4]);
+    expect(canSelectScoringDice(state)).toBe(true);
+    state = selectValues(state, [2]);
+    state = selectScoringDice(state);
+    expect(state.dice.filter((die) => die.selected).map((die) => die.value)).toEqual([1, 1, 1]);
+    expect(selectionView(state).points).toBe(300);
+    expect(canSelectScoringDice(state)).toBe(false);
+  });
+
   it("does not add a selection until the player commits", () => {
     let state = beginWith(["Ada", "Bo"], 0);
     state = applyRoll(state, [1, 1, 1, 2, 3, 4]);

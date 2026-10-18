@@ -63,6 +63,7 @@ test("highlights scoring dice, commits on roll or bank, and shakes on a Farkle",
   await expect(tray.locator("[data-selected='true']")).toHaveCount(0);
   await expect(tray.locator("[data-value='2']")).toHaveAttribute("data-hint", "false");
   await expect(page.getByTestId("turn-score")).toHaveText("0");
+  await expect(page.getByTestId("select-scoring")).toBeEnabled();
   await page.screenshot({ path: "/tmp/farkle-shots/hints.png" });
 
   await tray.locator("[data-value='1']").first().click();
@@ -74,12 +75,20 @@ test("highlights scoring dice, commits on roll or bank, and shakes on a Farkle",
   await tray.locator("[data-selected='true']").nth(0).click();
   await tray.locator("[data-selected='true']").nth(0).click();
 
-  await tray.locator("[data-value='1']").first().click();
-  await expect(page.getByTestId("selection-points")).toContainText("Worth 100");
+  await page.getByTestId("select-scoring").click();
+  await expect(tray.locator("[data-selected='true']")).toHaveCount(3);
+  await expect(page.getByTestId("selection-points")).toContainText("Worth 300");
+  await expect(page.getByTestId("select-scoring")).toBeDisabled();
   await expect(page.getByTestId("turn-score")).toHaveText("0");
-  await expect(page.getByTestId("bank-button")).toBeDisabled();
   await expect(page.getByTestId("commit-note")).toBeVisible();
   await page.screenshot({ path: "/tmp/farkle-shots/selected.png" });
+
+  await tray.locator("[data-selected='true']").nth(2).click();
+  await tray.locator("[data-selected='true']").nth(1).click();
+  await expect(tray.locator("[data-selected='true']")).toHaveCount(1);
+  await expect(page.getByTestId("selection-points")).toContainText("Worth 100");
+  await expect(page.getByTestId("bank-button")).toBeDisabled();
+  await expect(page.getByTestId("select-scoring")).toBeEnabled();
 
   await queue(page, [5, 2, 3, 4, 6]);
   await page.getByTestId("roll-button").click();
